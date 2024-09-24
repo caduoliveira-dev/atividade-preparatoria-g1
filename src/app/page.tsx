@@ -1,101 +1,159 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+
+interface Producao {
+  titulo: string;
+  descricao: string;
+  tipo: "filme" | "serie";
+  ano: string;
+  genero: string;
+  duracao?: string;
+  temporadas?: string;
+  avaliacao?: number; // Adicionando campo de avaliação
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [formData, setFormData] = useState<Producao>({
+    titulo: "",
+    descricao: "",
+    tipo: "filme",
+    ano: "",
+    genero: "",
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const [productions, setProductions] = useState<Producao[]>([]);
+
+  useEffect(() => {
+    const storedProductions = localStorage.getItem("productions");
+    if (storedProductions) {
+      setProductions(JSON.parse(storedProductions));
+    }
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleTypeChange = (value: "filme" | "serie") => {
+    setFormData({ ...formData, tipo: value });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!formData.titulo || !formData.ano || !formData.genero) {
+      alert("Por favor, preencha todos os campos obrigatórios!");
+      return;
+    }
+
+    const updatedProductions = [...productions, { ...formData, avaliacao: 0 }];
+    setProductions(updatedProductions);
+    localStorage.setItem("productions", JSON.stringify(updatedProductions));
+
+    // Reset the form
+    setFormData({
+      titulo: "",
+      descricao: "",
+      tipo: "filme",
+      ano: "",
+      genero: "",
+    });
+  };
+
+  const handleDelete = (index: number) => {
+    const updatedProductions = productions.filter((_, i) => i !== index);
+    setProductions(updatedProductions);
+    localStorage.setItem("productions", JSON.stringify(updatedProductions));
+  };
+
+  const handleRating = (index: number, rating: number) => {
+    const updatedProductions = productions.map((production, i) => 
+      i === index ? { ...production, avaliacao: rating } : production
+    );
+    setProductions(updatedProductions);
+    localStorage.setItem("productions", JSON.stringify(updatedProductions));
+  };
+
+  return (
+    <main className="p-8 lg:grid lg:grid-cols-2">
+      <div className="mr-4">
+        <form className="grid gap-4" onSubmit={handleSubmit}>
+          <Label>Título</Label>
+          <Input type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
+
+          <Label>Descrição</Label>
+          <Textarea name="descricao" value={formData.descricao} onChange={handleChange} />
+
+          <Label>Tipo</Label>
+          <RadioGroup value={formData.tipo} onValueChange={handleTypeChange}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="filme" id="r1" />
+              <Label htmlFor="r1">Filme</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="serie" id="r2" />
+              <Label htmlFor="r2">Série</Label>
+            </div>
+          </RadioGroup>
+
+          <Label>Ano</Label>
+          <Input type="text" name="ano" value={formData.ano} onChange={handleChange} required />
+
+          <Label>Gênero</Label>
+          <Input type="text" name="genero" value={formData.genero} onChange={handleChange} required />
+
+          {formData.tipo === "filme" ? (
+            <>
+              <Label>Duração</Label>
+              <Input type="text" name="duracao" value={formData.duracao} onChange={handleChange} />
+            </>
+          ) : (
+            <>
+              <Label>Temporadas</Label>
+              <Input type="text" name="temporadas" value={formData.temporadas} onChange={handleChange} />
+            </>
+          )}
+          
+          <div>
+            <Button className="bg-blue-600 hover:bg-blue-800 mr-4" type="submit">Salvar</Button>
+            <Button className="bg-zinc-600 hover:bg-zinc-800">Cancelar</Button>
+          </div>
+        </form>
+      </div>
+      <div className="mt-4 lg:mt-0">
+        {productions.map((production, index) => (
+          <Card key={index} className="mb-4">
+            <CardHeader>
+              <p>{production.tipo.charAt(0).toUpperCase() + production.tipo.slice(1)}</p>
+            </CardHeader>
+            <Separator />
+            <CardContent className="mt-4">
+              <CardTitle className="text-lg mb-2">{production.titulo}</CardTitle>
+              <p className="font-semibold">{production.ano} - {production.genero} - {production.tipo === "filme" ? production.duracao : production.temporadas}</p>
+              <p className="justify">{production.descricao}</p>
+              <div className="mt-2">
+                <Button className="bg-blue-600 hover:bg-blue-800 mr-4">Editar</Button>
+                <Button className="bg-red-600 hover:bg-red-800" onClick={() => handleDelete(index)}>Excluir</Button>
+              </div>
+            </CardContent>
+            <CardFooter className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button key={star} onClick={() => handleRating(index, star)} className="text-yellow-500">
+                  {star <= (production.avaliacao || 0) ? '★' : '☆'}
+                </button>
+              ))}
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </main>
   );
 }
